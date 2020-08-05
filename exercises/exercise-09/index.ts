@@ -71,30 +71,40 @@ type ApiResponse<T> = (
     }
 );
 
-function promisify(arg: unknown): unknown {
-    return null;
+type Callback<T> = (response: ApiResponse<T>) => void;
+
+function promisify<T>(arg: (callback: Callback<T>) => void): () => Promise<T> {
+    return () => new Promise<T>((resolve, reject) => {
+        arg((response: ApiResponse<T>) => {
+            if (response.status === 'success') {
+                resolve(response.data);
+            } else {
+                reject(response.error);
+            }
+        });
+    });
 }
 
 const oldApi = {
-    requestAdmins(callback: (response: ApiResponse<Admin[]>) => void) {
+    requestAdmins(callback: Callback<Admin[]>) {
         callback({
             status: 'success',
             data: admins
         });
     },
-    requestUsers(callback: (response: ApiResponse<User[]>) => void) {
+    requestUsers(callback: Callback<User[]>) {
         callback({
             status: 'success',
             data: users
         });
     },
-    requestCurrentServerTime(callback: (response: ApiResponse<number>) => void) {
+    requestCurrentServerTime(callback: Callback<number>) {
         callback({
             status: 'success',
             data: Date.now()
         });
     },
-    requestCoffeeMachineQueueLength(callback: (response: ApiResponse<number>) => void) {
+    requestCoffeeMachineQueueLength(callback: Callback<number>) {
         callback({
             status: 'error',
             error: 'Numeric value has exceeded Number.MAX_SAFE_INTEGER.'
