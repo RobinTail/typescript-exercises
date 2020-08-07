@@ -1,7 +1,9 @@
 import {Database} from './database';
 import * as path from 'path';
-import {promises as fs} from 'mz/fs';
+import * as fs from 'fs';
+import {promisify} from 'util'
 import {expect} from 'chai';
+const copyFile = promisify(fs.copyFile);
 
 /*
 
@@ -46,7 +48,7 @@ interface User {
 }
 
 async function testUsersDatabase() {
-    await fs.copyFile(path.join(__dirname, 'initial-users.txt'), path.join(__dirname, 'users.txt'));
+    await copyFile(path.join(__dirname, 'initial-users.txt'), path.join(__dirname, 'users.txt'));
 
     const usersDatabase = new Database<User>(path.join(__dirname, 'users.txt'), ['name', 'occupation']);
 
